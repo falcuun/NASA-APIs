@@ -13,10 +13,48 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\API Constructors">
+      <UniqueIdentifier>{cdc8989d-8c8a-440f-a5e9-c2a7c4a390ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\API Definitions">
+      <UniqueIdentifier>{b7633a69-3d03-49bc-99db-4fbc5ee019b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Models">
+      <UniqueIdentifier>{04924a7c-91b0-4c16-93a9-efefeeef05e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\API Models">
+      <UniqueIdentifier>{e9788109-5cc0-4db2-a4b2-6ed89105edb1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="APOD_Endpoint.cpp">
+      <Filter>Source Files\API Constructors</Filter>
+    </ClCompile>
+    <ClCompile Include="APOD_Model.cpp">
+      <Filter>Source Files\API Models</Filter>
+    </ClCompile>
+    <ClCompile Include="AsteroidsNeoWs_Endpoint.cpp">
+      <Filter>Source Files\API Constructors</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="APOD_Endpoint.h">
+      <Filter>Header Files\API Definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="Endpoints.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GlobalHeader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="APOD_Model.h">
+      <Filter>Header Files\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="AsteroidsNeoWs_Endpoint.h">
+      <Filter>Header Files\API Definitions</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

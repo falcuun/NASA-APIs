@@ -1,14 +1,15 @@
-#include <iostream>
-#include <fstream>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string>
+
+#include "GlobalHeader.h"
+#include "Endpoints.h"
+#include "APOD_Model.h"
 
 
 const char CURL[9] = "curl -s ";
 
 
-std::string curl_execute_command_with_output(char* command) {
+using namespace nlohmann;
+
+std::string curl_execute_command_with_output(std::string command) {
 	// Declaring Result string (Method return). Should return output of the command.
 	std::string result;
 	// Defining the name of the file that command output will be written to.
@@ -18,15 +19,13 @@ std::string curl_execute_command_with_output(char* command) {
 	// Concatenating the file name to the right side of the pipe.
 	strcat_s(command_output_destination, file_name);
 	// Declaring empty buffer that will whole the entire command signature (Command + File destination).
-	char buffer[496] = { 0 };
+	std::stringstream buffer;
 	// Concatenating the command to the buffer.
-	strcat_s(buffer, command);
 	// Concatenating pipe and file destination to the command.
-	strcat_s(buffer, command_output_destination);
 	// Concatenating zero-termination to the buffer.
-	strcat_s(buffer, "\0\r");
+	buffer << command << command_output_destination << "\0\r";
 	// Running the System command.
-	system(buffer);
+	system(buffer.str().c_str());
 	// Opening File Input Stream to read the text from the output file.
 	std::ifstream command_file(file_name);
 	// Assigning the text from the output file to the result string. 
@@ -38,30 +37,68 @@ std::string curl_execute_command_with_output(char* command) {
 }
 
 
-std::string curl_get_request(const char* url) {
-	char command[496] = { 0 };
-	strcat_s(command, CURL);
-	strcat_s(command, url);
-	strcat_s(command, "\0\r");
-	return curl_execute_command_with_output(command);
+std::string curl_get_request(std::string url) {
+	std::stringstream command;
+	command << CURL << url << "\0\r";
+	return curl_execute_command_with_output(command.str());
 }
 
-void curl_execute_command_download_jpg(const char* url, std::string image_name) {
-	char command[2048] = { 0 };
-	strcat_s(command, CURL);
-	strcat_s(command, url);
-	strcat_s(command, " > ");
+// TODO: Don't Try To Download if it's not an image (Check for .jpg)
+
+void curl_execute_command_download_jpg(std::string url, std::string image_name) {
+	std::stringstream command;
+	command << CURL << url << '>';
 	std::remove_if(image_name.begin(), image_name.end(), ::isspace);
-	strcat_s(command, image_name.c_str());
-	strcat_s(command, ".jpg");
-	strcat_s(command, "\0\r");
-	system(command);
+	command << image_name << ".jpg" << "\0\r";
+	system(command.str().c_str());
 }
 
+std::string json_object_toString(json json_object, std::string param) {
+	return json_object[param].is_null() ? "" : json_object[param];
+}
+
+void jsonObjectToAPODObject(json jsonParsed) {
+	APOD_Model apodMod(
+		json_object_toString(jsonParsed, "copyright"),
+		json_object_toString(jsonParsed, "date"),
+		json_object_toString(jsonParsed, "explanation"),
+		json_object_toString(jsonParsed, "hdurl"),
+		json_object_toString(jsonParsed, "media_type"),
+		json_object_toString(jsonParsed, "service_version"),
+		json_object_toString(jsonParsed, "title"),
+		json_object_toString(jsonParsed, "url"));
+	std::cout << apodMod.get_copyright() << std::endl << apodMod.get_date() << std::endl << apodMod.get_explanation() << std::endl
+		<< apodMod.get_hdurl() << std::endl << apodMod.get_media_type() << std::endl << apodMod.get_service_version() << std::endl
+		<< apodMod.get_title() << std::endl << apodMod.get_url() << std::endl;
+	curl_execute_command_download_jpg(apodMod.get_hdurl(), apodMod.get_date());
+}
+
+
+void APOD_API_test() {
+	APOD_Endpoint apod("", "", "", 50, true);
+	try {
+		auto jsonParsed = json::parse(curl_get_request(apod.toString()));
+		if (jsonParsed.is_object()) {
+			jsonObjectToAPODObject(jsonParsed);
+		}
+		if (jsonParsed.is_array()) {
+			for (auto jo : jsonParsed) {
+				jsonObjectToAPODObject(jo);
+			}
+		}
+	}
+	catch (std::exception err) {
+		std::cout << "There was an error processing this parameter combination" << std::endl;
+		std::cout << err.what() << std::endl;
+	}
+
+}
 
 
 int main() {
-	 std::string ss = curl_get_request("https://jsonplaceholder.typicode.com/todos/2\0\r");
-	 std::cout << ss;
+	APOD_API_test();
 	return 0;
 }
+
+
+// NASA API KEY 5d1KyFnmGDKbtJYgl9jDBMnvF6LiMq3CHUpbs703
